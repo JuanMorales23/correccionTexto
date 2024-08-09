@@ -1,4 +1,5 @@
 package com.savia.correcciontexto.Service;
+
 import com.savia.correcciontexto.Util.Diccionario;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +14,6 @@ import java.util.Set;
 
 @Service
 public class CorrectorService {
-    // Diccionario personalizado de palabras mal formadas
     private final Set<String> diccionario;
     private final JLanguageTool langTool;
     private final LevenshteinDistance levenshtein;
@@ -27,29 +27,37 @@ public class CorrectorService {
     }
 
     public String correctText(@NotNull String inputText) throws Exception {
-        // Paso 1: Corrección de palabras mal formadas usando el diccionario
-        String correctedText = correctCustomWords(inputText);
+        // Paso 1: Corrección de representaciones incorrectas de caracteres especiales
+        String correctedText = correctSpecialCharacters(inputText);
 
-        // Paso 2: Corrección ortográfica utilizando LanguageTool
+        // Paso 2: Corrección de palabras mal formadas usando el diccionario
+        correctedText = correctCustomWords(correctedText);
+
+        // Paso 3: Corrección ortográfica utilizando LanguageTool
         correctedText = correctSpelling(correctedText);
 
         return correctedText;
     }
 
+    private String correctSpecialCharacters(String text) {
+        return text.replaceAll("a&os", "años")
+                .replaceAll("cent&metros", "centímetros")
+                .replaceAll("cuerna", "cuenta") // Corrige otros errores comunes aquí
+                .replaceAll("kls", "kilos");
+    }
+
     private String correctCustomWords(String text) {
-        String[] lines = text.split("\\r?\\n"); // Se divide por lineas
+        String[] lines = text.split("\\r?\\n");
         StringBuilder correctedText = new StringBuilder();
         for (String line : lines) {
-            String[] words = line.split("\\s+"); // Se divide en palabras
+            String[] words = line.split("\\s+");
             for (String word : words) {
-                // Verifica si el texto es un salto de línea o contiene solo números
                 if (word.matches("[0-9]+") || word.matches("[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ]+")) {
                     correctedText.append(word).append(" ");
                 } else {
-                    // Elimina caracteres especiales y verificar en el diccionario
                     String cleanedWord = word.replaceAll("[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ]", "");
 
-                    if (diccionario.contains(cleanedWord.toLowerCase()) || cleanedWord.equals("")) {
+                    if (diccionario.contains(cleanedWord.toLowerCase()) || cleanedWord.isEmpty()) {
                         correctedText.append(word).append(" ");
                     } else {
                         String closestWord = findClosestWord(cleanedWord);
@@ -57,14 +65,13 @@ public class CorrectorService {
                     }
                 }
             }
-            correctedText.append("\n"); // Mantener el salto de línea
+            correctedText.append("\n");
         }
         return correctedText.toString().trim();
     }
 
     private String findClosestWord(String word) {
         if (word.matches("[0-9]+")) {
-            // Si la palabra es un número, no se hacen correcciones
             return word;
         }
 
@@ -75,8 +82,8 @@ public class CorrectorService {
                 .orElse(word);
     }
 
-    private String correctSpelling(String text) throws Exception {
-        String[] lines = text.split("\\r?\\n");  // Dividir en líneas para mantener los saltos de línea
+    private String correctSpelling(String text) throws IOException {
+        String[] lines = text.split("\\r?\\n");
         StringBuilder correctedText = new StringBuilder();
 
         for (String line : lines) {
