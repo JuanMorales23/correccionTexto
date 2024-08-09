@@ -30,17 +30,28 @@
         <java.version>17</java.version>
     </properties>
     <dependencies>
+
+        <!-- Apache Commons Text para manejo de palabras -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.9</version>
+        </dependency>
+
+        <!-- LanguageTool para corrección ortográfica -->
+        <!-- https://mvnrepository.com/artifact/org.languagetool/languagetool-core -->
+        <dependency>
+            <groupId>org.languagetool</groupId>
+            <artifactId>language-es</artifactId>
+            <version>6.4</version>
+        </dependency>
+
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
